@@ -10,8 +10,8 @@ namespace :black_job do
     solutions = get_solution_class(ENV["Solutions"])
     worker = BlackJob::Worker.new(ENV["Key"], solutions)
     # 后台模式
-    worker.daemonize(ENV["Action"])
+#    worker.daemonize(ENV["Action"])
     # 前台模式
-#    worker.working
+    worker.working
   end
 end

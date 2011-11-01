@@ -1,5 +1,7 @@
 module BlackJob
   class Engine < Rails::Engine
+    # 初始化redis配置
+    BlackJob::Config.redis = {"host"=>"127.0.0.1", "port" => "6379"}
 
     engine_name :black_job
     # Load rake tasks
