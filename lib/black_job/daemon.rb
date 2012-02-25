@@ -6,18 +6,30 @@ module BlackJob
     WorkingDirectory = Rails.root
 
     class Base
+      attr_accessor :is_daemon
+      
       def pid_fn
         File.join(WorkingDirectory, "#{name}.pid")
       end
       
       def daemonize(action='start')
+        self.is_daemon = true
         Controller.daemonize(self,action)
+      end
+      
+      def clean_pid_file
+        FileUtils.rm(self.pid_fn)
       end
     end
     
     module PidFile
       def self.store(daemon, pid)
-        File.open(daemon.pid_fn, 'w+') {|f| f << pid}
+        if File.exist?(daemon.pid_fn)
+          data = IO.read(daemon.pid_fn).chomp($/)
+          puts "BlackJob already exists with pid - #{data}"
+          puts "New Process will overwrite the pid file."
+        end
+        File.open(daemon.pid_fn, 'w+') {|f| f << pid; f << $/}
       end
       
       def self.recall(daemon)
@@ -63,8 +75,7 @@ module BlackJob
           exit
         end
         pid = PidFile.recall(daemon)
-        FileUtils.rm(daemon.pid_fn)
-        pid && Process.kill("TERM", pid)
+        pid && Process.kill("INT", pid) rescue nil
       end
     end
 
